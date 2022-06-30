@@ -1,0 +1,9 @@
+ftp:
+  host: 127.0.0.1
+  user: username
+  passwd: mypass
+  imagepath: /images
+  tmpimagepath: /tmpimages
+
+redis:
+  url: redis://localhost:6379/0
