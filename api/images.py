@@ -4,14 +4,14 @@ from fastapi import APIRouter, Response, status
 from PIL import UnidentifiedImageError
 from loguru import logger
 
-from model.images import Image
+from model.images import BaseImage
 from service.image_service import download_image, confirm_image, get_uuid
 
 router = APIRouter(prefix='/images')
 
 
 @router.post('/download')
-async def download(image: Image) -> Response:
+async def download(image: BaseImage) -> Response:
     try:
         received_image = await download_image(image)
     except UnidentifiedImageError:

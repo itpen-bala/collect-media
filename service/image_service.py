@@ -8,10 +8,10 @@ from PIL import Image as PILImage, UnidentifiedImageError
 from config import settings, app
 from client.client import create_session
 from storage.ftp import FTPClient
-from model.images import Image
+from model.images import BaseImage
 
 
-async def download_image(image: Image):
+async def download_image(image: BaseImage):
     uuid = str(image.uuid)
     data = io.BytesIO(await create_session(image.url))
     try:
