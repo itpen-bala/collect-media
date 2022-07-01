@@ -9,6 +9,7 @@ from config import settings, app
 from client.client import create_session
 from storage.ftp import FTPClient
 from model.images import BaseImage
+from storage.repositories import ImageRepository
 
 
 async def download_image(image: BaseImage):
@@ -16,7 +17,8 @@ async def download_image(image: BaseImage):
     data = io.BytesIO(await create_session(image.url))
     try:
         rcvd_image = PILImage.open(data)
-        logger.info('Received file with format ', rcvd_image.format)
+        logger.info(f'Received file with format {rcvd_image.format}')
+
     except UnidentifiedImageError as err:
         logger.info('Can\'t download image. ', err)
         raise UnidentifiedImageError
@@ -36,6 +38,15 @@ async def confirm_image(uuid: UUID):
 
     src_file = settings.ftp.tmpimagepath + '/' + uuid
     dst_file = os.path.join(settings.ftp.imagepath, uuid)
+
+    image = PILImage.open(src_file)
+    width = image.width
+    height = image.height
+    image_size = image.image_size
+    file_size = os.stat(src_file).st_size
+
+    img = ImageRepository().create()
+
     ftp = FTPClient()
     ftp.mkd(parent_dir='/', directory=settings.ftp.imagepath)
     ftp.move_file(src_file=src_file, dst_file=dst_file)

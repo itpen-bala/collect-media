@@ -20,9 +20,10 @@ images = sqlalchemy.Table(
     sqlalchemy.Column("uuid", UUID(as_uuid=True), unique=True, nullable=False),
     sqlalchemy.Column("url", sqlalchemy.String, nullable=False),
     sqlalchemy.Column("format", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("size", sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column("width", sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column("height", sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column("image_size", sqlalchemy.ARRAY, nullable=False),
+    sqlalchemy.Column("file_size", sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column("created_at", sqlalchemy.DateTime, default=datetime.datetime.utcnow()),
     sqlalchemy.Column("updated_at", sqlalchemy.DateTime, default=datetime.datetime.utcnow()),
 )

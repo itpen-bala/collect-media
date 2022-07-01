@@ -18,11 +18,12 @@ class ImageRepository(BaseRepository):
             uuid=image.uuid,
             url=image.url,
             format=image.format,
-            size=image.size,
             width=image.width,
-            height=image.heigth,
+            height=image.height,
+            image_size=image.image_size,
+            file_size=image.file_size,
             created_at=datetime.datetime.utcnow(),
-            updated_at=datetime.datetime.utcnow()
+            updated_at=datetime.datetime.utcnow(),
         )
         values = image.dict()
         values.pop('id')

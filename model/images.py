@@ -12,17 +12,11 @@ class BaseImage(BaseModel):
 
 
 class ImageCreate(BaseImage):
+    ftp_path: str
     format: str
-    size: int
     width: int
-    heigth: int
+    height: int
+    image_size: tuple[int, int]
+    file_size: int
     created_at: datetime.datetime
     updated_at: datetime.datetime
-
-
-class ImageForUser(BaseImage):
-    format: str
-    size: int
-    size: int
-    width: int
-    heigth: int
