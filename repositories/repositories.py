@@ -3,7 +3,7 @@ import datetime
 from databases import Database
 
 from model.images import ImageCreate
-from storage.postgres import images
+from db.postgres import images
 
 
 class BaseRepository:
