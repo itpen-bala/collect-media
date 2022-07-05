@@ -9,7 +9,7 @@ image_files = sqlalchemy.Table(
     "image_files",
     metadata,
     sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True, unique=True),
-    sqlalchemy.Column("uuid", UUID(as_uuid=True), unique=True, nullable=False),
+    sqlalchemy.Column("uuid", UUID, unique=True, nullable=False),
     sqlalchemy.Column("url", sqlalchemy.VARCHAR, nullable=False),
     sqlalchemy.Column("ftp_path", sqlalchemy.VARCHAR, nullable=False),
     sqlalchemy.Column("format", sqlalchemy.VARCHAR, nullable=False),

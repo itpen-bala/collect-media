@@ -1,16 +1,12 @@
 import datetime
+from uuid import UUID
+from typing import Optional
 
 from loguru import logger
-from databases import Database
 
+from .base import BaseRepository
 from model.images import Image
 from db.postgres import image_files
-
-
-class BaseRepository:
-    def __init__(self, db: Database):
-        self.db = db
-        print('DB: ', self.db)
 
 
 class ImageRepository(BaseRepository):
@@ -32,3 +28,13 @@ class ImageRepository(BaseRepository):
         values.pop('id', None)
         query = image_files.insert().values(**values)
         await self.db.execute(query=query)
+
+    async def delete(self, uuid: UUID) -> Optional[Image]:
+        query = image_files.select().where(image_files.c.uuid == uuid)
+        image = await self.db.fetch_one(query=query)
+        if not image:
+            return None
+        else:
+            query = image_files.delete().where(image_files.c.uuid == uuid)
+            await self.db.execute(query=query)
+            return Image.parse_obj(image)

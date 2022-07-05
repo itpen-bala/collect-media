@@ -2,6 +2,7 @@ import os
 import io
 import datetime
 from uuid import UUID
+from typing import Optional
 
 from loguru import logger
 from PIL import Image as PILImage, UnidentifiedImageError
@@ -11,7 +12,7 @@ from client.client import create_session
 from storage.ftp import FTPClient
 from model.images import BaseImage, Image
 from db.base import database
-from repositories.repositories import ImageRepository
+from repositories.images import ImageRepository
 
 __image_repository = ImageRepository(database)
 
@@ -73,5 +74,5 @@ async def get_uuid():
     logger.info('V: ', v)
 
 
-async def delete_key():
-    await app.state.redis.delete('17a80487-0f33-49f9-b8cc-ba60bf79b0c9')
+async def delete_image(uuid: UUID) -> Optional[Image]:
+    return await __image_repository.delete(uuid)

@@ -1,6 +1,7 @@
 from uuid import UUID
+from typing import Optional
 
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Response, status, HTTPException
 from PIL import UnidentifiedImageError
 from loguru import logger
 
@@ -31,6 +32,9 @@ async def get():
     return status.HTTP_200_OK
 
 
-@router.delete('/')
-async def delete_key():
-    await image_service.delete_key()
+@router.delete('/delete/{uuid}')
+async def delete_image(uuid: UUID) -> Optional[Image]:
+    image = await image_service.delete_image(uuid)
+    if not image:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    return image
