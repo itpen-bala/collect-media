@@ -1,6 +1,8 @@
+import io
+
 import ftplib
 from ftplib import FTP
-from typing import Any, Optional
+from typing import Any, Optional, BinaryIO
 from loguru import logger
 
 import config
@@ -33,7 +35,14 @@ class FTPClient:
 
     def upload_opened_file(self, file, ftp_path: str) -> None:
         logger.info('Upload file to FTP path {}', ftp_path)
+        logger.info(f'FILE: {type(file)}')
         self.client.storbinary('STOR ' + ftp_path, file)
+
+    def get_opened_file(self, ftp_path) -> Any:
+        logger.info('Opening file from FTP path {}', ftp_path)
+        f = io.BytesIO()
+        self.client.retrbinary('RETR ' + ftp_path, f.write)
+        return f
 
     def move_file(self, src_file: str, dst_file: str) -> None:
         # TODO: check this method, when we want move a file to another file system
@@ -60,3 +69,6 @@ class FTPClient:
         if self.is_dir_exist(directory) is False:
             logger.info(f'Creating directory: {directory}')
             self.client.mkd(directory)
+
+    def get_size(self, file_path):
+        return self.client.size(file_path)

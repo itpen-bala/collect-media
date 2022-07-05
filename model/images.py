@@ -11,12 +11,12 @@ class BaseImage(BaseModel):
     url: str
 
 
-class ImageCreate(BaseImage):
+class Image(BaseImage):
     ftp_path: str
     format: str
     width: int
     height: int
     image_size: tuple[int, int]
-    file_size: int
+    file_size: int  # size in bytes
     created_at: datetime.datetime
     updated_at: datetime.datetime

@@ -28,6 +28,7 @@ CREATE TABLE public.image_files (
     id integer NOT NULL,
     uuid uuid NOT NULL,
     url character varying(2048) NOT NULL,
+    ftp_path character varying(2048) NOT NULL,
     format character varying(20) NOT NULL,
     width smallint NOT NULL,
     height smallint NOT NULL,
@@ -73,7 +74,7 @@ ALTER TABLE ONLY public.image_files ALTER COLUMN id SET DEFAULT nextval('public.
 -- Data for Name: image_files; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.image_files (id, uuid, url, format, width, height, image_size, file_size, created_at, updated_at) FROM stdin;
+COPY public.image_files (id, uuid, url, ftp_path, format, width, height, image_size, file_size, created_at, updated_at) FROM stdin;
 \.
 
 
@@ -81,7 +82,7 @@ COPY public.image_files (id, uuid, url, format, width, height, image_size, file_
 -- Name: image_files_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.image_files_id_seq', 1, false);
+SELECT pg_catalog.setval('public.image_files_id_seq', 2, true);
 
 
 --
@@ -93,11 +94,17 @@ ALTER TABLE ONLY public.image_files
 
 
 --
--- Name: image_files image_files_uuid_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: TABLE image_files; Type: ACL; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.image_files
-    ADD CONSTRAINT image_files_uuid_key UNIQUE (uuid);
+GRANT ALL ON TABLE public.image_files TO media_user;
+
+
+--
+-- Name: SEQUENCE image_files_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,USAGE ON SEQUENCE public.image_files_id_seq TO media_user;
 
 
 --

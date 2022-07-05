@@ -1,5 +1,6 @@
 import os
 import io
+import datetime
 from uuid import UUID
 
 from loguru import logger
@@ -8,8 +9,11 @@ from PIL import Image as PILImage, UnidentifiedImageError
 from config import settings, app
 from client.client import create_session
 from storage.ftp import FTPClient
-from model.images import BaseImage
-from storage.repositories import ImageRepository
+from model.images import BaseImage, Image
+from db.base import database
+from repositories.repositories import ImageRepository
+
+__image_repository = ImageRepository(database)
 
 
 async def download_image(image: BaseImage):
@@ -20,11 +24,12 @@ async def download_image(image: BaseImage):
         logger.info(f'Received file with format {rcvd_image.format}')
 
     except UnidentifiedImageError as err:
-        logger.info('Can\'t download image. ', err)
+        logger.info('Can\'t download_image image. ', err)
         raise UnidentifiedImageError
 
     ftp = FTPClient()
     ftp.mkd(parent_dir='/', directory=settings.ftp.tmpimagepath)
+    data.seek(0)
     ftp.upload_opened_file(file=data, ftp_path=os.path.join(settings.ftp.tmpimagepath, uuid))
 
     await app.state.redis.set(uuid, image.url)
@@ -36,22 +41,29 @@ async def confirm_image(uuid: UUID):
     image_url = await app.state.redis.get(uuid)
     logger.info(f'URL: {image_url}')
 
+    ftp = FTPClient()
     src_file = settings.ftp.tmpimagepath + '/' + uuid
     dst_file = os.path.join(settings.ftp.imagepath, uuid)
+    image = PILImage.open(ftp.get_opened_file(src_file))
 
-    image = PILImage.open(src_file)
-    width = image.width
-    height = image.height
-    image_size = image.image_size
-    file_size = os.stat(src_file).st_size
+    image_for_db = Image(uuid=uuid,
+                         url=image_url,
+                         ftp_path=dst_file,
+                         format=image.format,
+                         width=image.width,
+                         height=image.height,
+                         image_size=image.size,
+                         file_size=ftp.get_size(src_file),  # size in bytes
+                         created_at=datetime.datetime.utcnow(),
+                         updated_at=datetime.datetime.utcnow(),
+                         )
+    inserting_image = await __image_repository.create(image_for_db)
 
-    img = ImageRepository().create()
-
-    ftp = FTPClient()
     ftp.mkd(parent_dir='/', directory=settings.ftp.imagepath)
     ftp.move_file(src_file=src_file, dst_file=dst_file)
-
     await app.state.redis.delete(uuid)
+
+    return inserting_image
 
 
 async def get_uuid():
@@ -59,3 +71,7 @@ async def get_uuid():
     logger.info('V: ', v)
     v = await app.state.redis.keys()
     logger.info('V: ', v)
+
+
+async def delete_key():
+    await app.state.redis.delete('17a80487-0f33-49f9-b8cc-ba60bf79b0c9')
