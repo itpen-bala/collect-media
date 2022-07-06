@@ -14,7 +14,9 @@ from model.images import BaseImage, Image
 from db.base import database
 from repositories.images import ImageRepository
 
+
 __image_repository = ImageRepository(database)
+__ftp = FTPClient()
 
 
 async def download_image(image: BaseImage):
@@ -37,15 +39,14 @@ async def download_image(image: BaseImage):
     return image
 
 
-async def confirm_image(uuid: UUID):
+async def confirm_image(uuid: UUID) -> Optional[Image]:
     uuid = str(uuid)
     image_url = await app.state.redis.get(uuid)
     logger.info(f'URL: {image_url}')
 
-    ftp = FTPClient()
     src_file = settings.ftp.tmpimagepath + '/' + uuid
     dst_file = os.path.join(settings.ftp.imagepath, uuid)
-    image = PILImage.open(ftp.get_opened_file(src_file))
+    image = PILImage.open(__ftp.get_opened_file(src_file))
 
     image_for_db = Image(uuid=uuid,
                          url=image_url,
@@ -54,14 +55,14 @@ async def confirm_image(uuid: UUID):
                          width=image.width,
                          height=image.height,
                          image_size=image.size,
-                         file_size=ftp.get_size(src_file),  # size in bytes
+                         file_size=__ftp.get_size(src_file),  # size in bytes
                          created_at=datetime.datetime.utcnow(),
                          updated_at=datetime.datetime.utcnow(),
                          )
     inserting_image = await __image_repository.create(image_for_db)
 
-    ftp.mkd(parent_dir='/', directory=settings.ftp.imagepath)
-    ftp.move_file(src_file=src_file, dst_file=dst_file)
+    __ftp.mkd(parent_dir='/', directory=settings.ftp.imagepath)
+    __ftp.move_file(src_file=src_file, dst_file=dst_file)
     await app.state.redis.delete(uuid)
 
     return inserting_image
@@ -75,4 +76,7 @@ async def get_uuid():
 
 
 async def delete_image(uuid: UUID) -> Optional[Image]:
-    return await __image_repository.delete(uuid)
+    image = await __image_repository.delete(uuid)
+    if image is not None:
+        __ftp.delete(image.ftp_path)
+    return image

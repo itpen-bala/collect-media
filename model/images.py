@@ -6,12 +6,13 @@ from typing import Optional
 
 
 class BaseImage(BaseModel):
-    id: Optional[int] = None
     uuid: UUID
     url: str
 
 
 class Image(BaseImage):
+    id: Optional[int] = None
+    uuid: UUID
     ftp_path: str
     format: str
     width: int

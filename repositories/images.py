@@ -27,7 +27,8 @@ class ImageRepository(BaseRepository):
         values = image.dict()
         values.pop('id', None)
         query = image_files.insert().values(**values)
-        await self.db.execute(query=query)
+        image.id = await self.db.execute(query=query)
+        return image
 
     async def delete(self, uuid: UUID) -> Optional[Image]:
         query = image_files.select().where(image_files.c.uuid == uuid)

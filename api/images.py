@@ -7,6 +7,7 @@ from loguru import logger
 
 import service.image_service as image_service
 from model.images import BaseImage, Image
+from exceptions import InternalServerException
 
 router = APIRouter(prefix='/images')
 
@@ -21,7 +22,7 @@ async def download_image(image: BaseImage) -> Response:
 
 
 @router.put('/confirm-image/{uuid}')
-async def confirm_image(uuid: UUID) -> Image:
+async def confirm_image(uuid: UUID) -> Optional[Image]:
     image = await image_service.confirm_image(uuid)
     return image
 
@@ -34,7 +35,10 @@ async def get():
 
 @router.delete('/delete/{uuid}')
 async def delete_image(uuid: UUID) -> Optional[Image]:
-    image = await image_service.delete_image(uuid)
+    try:
+        image = await image_service.delete_image(uuid)
+    except InternalServerException:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     if not image:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
     return image

@@ -1,11 +1,16 @@
 import io
 
 import ftplib
-from ftplib import FTP
+from ftplib import (
+    FTP,
+    error_perm,
+    error_reply,
+)
 from typing import Any, Optional, BinaryIO
 from loguru import logger
 
 import config
+from exceptions import InternalServerException
 
 
 class FTPClient:
@@ -72,3 +77,11 @@ class FTPClient:
 
     def get_size(self, file_path):
         return self.client.size(file_path)
+
+    def delete(self, file_path) -> None:
+        try:
+            self.client.delete(file_path)
+        except error_perm as err:
+            raise InternalServerException(err)
+        except error_reply as err:
+            raise InternalServerException(err)
