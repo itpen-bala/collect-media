@@ -26,21 +26,8 @@ class FTPClient:
             passwd=passwd or config.settings.ftp.passwd
         )
 
-    def __enter__(self) -> 'FTPClient':
-        self.client.__enter__()
-        return self
-
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        self.client.__exit__(exc_type, exc_val, exc_tb)
-
-    def upload_file(self, file_name: str, ftp_path: str) -> None:
-        logger.info('Upload file {} to FTP path {}', file_name, ftp_path)
-        with open(file_name, 'rb') as f:
-            self.client.storbinary('STOR ' + ftp_path, f)
-
     def upload_opened_file(self, file, ftp_path: str) -> None:
         logger.info('Upload file to FTP path {}', ftp_path)
-        logger.info(f'FILE: {type(file)}')
         self.client.storbinary('STOR ' + ftp_path, file)
 
     def get_opened_file(self, ftp_path) -> Any:
@@ -57,7 +44,7 @@ class FTPClient:
         except ftplib.Error as e:
             logger.exception(e)
 
-    def is_dir_exist(self, directory):
+    def _is_dir_exist(self, directory):
         filelist = []
         self.client.retrlines('LIST', filelist.append)
         for f in filelist:
@@ -67,11 +54,11 @@ class FTPClient:
 
     def mkd(self, parent_dir, directory):
         self.client.cwd(parent_dir)
-        # Need remove start slash if it exist, because method "is_dir_exist" use FTP-command "LIST",
+        # Need remove start slash if it exist, because method "_is_dir_exist" use FTP-command "LIST",
         # that show all files in current directory with start slash in file names
         if directory[0] == '/':
             directory = directory[1:]
-        if self.is_dir_exist(directory) is False:
+        if self._is_dir_exist(directory) is False:
             logger.info(f'Creating directory: {directory}')
             self.client.mkd(directory)
 
