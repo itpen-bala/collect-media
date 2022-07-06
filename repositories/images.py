@@ -30,12 +30,25 @@ class ImageRepository(BaseRepository):
         image.id = await self.db.execute(query=query)
         return image
 
+    async def get_info_by_uuid(self, uuid: UUID) -> Optional[Image]:
+        query = image_files.select().where(image_files.c.uuid == uuid)
+        image = await self.db.fetch_one(query=query)
+        if not image:
+            return None
+        return Image.parse_obj(image)
+
+    async def get_info_by_id(self, image_id: int) -> Optional[Image]:
+        query = image_files.select().where(image_files.c.id == image_id)
+        image = await self.db.fetch_one(query=query)
+        if not image:
+            return None
+        return Image.parse_obj(image)
+
     async def delete(self, uuid: UUID) -> Optional[Image]:
         query = image_files.select().where(image_files.c.uuid == uuid)
         image = await self.db.fetch_one(query=query)
         if not image:
             return None
-        else:
-            query = image_files.delete().where(image_files.c.uuid == uuid)
-            await self.db.execute(query=query)
-            return Image.parse_obj(image)
+        query = image_files.delete().where(image_files.c.uuid == uuid)
+        await self.db.execute(query=query)
+        return Image.parse_obj(image)

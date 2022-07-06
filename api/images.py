@@ -3,7 +3,6 @@ from typing import Optional
 
 from fastapi import APIRouter, Response, status, HTTPException
 from PIL import UnidentifiedImageError
-from loguru import logger
 
 import service.image_service as image_service
 from model.images import BaseImage, Image
@@ -27,10 +26,20 @@ async def confirm_image(uuid: UUID) -> Optional[Image]:
     return image
 
 
-@router.get('/get')
-async def get():
-    await image_service.get_uuid()
-    return status.HTTP_200_OK
+@router.get('/info-by-uuid/{uuid}')
+async def get_image_info_by_uuid(uuid: UUID) -> Optional[Image]:
+    image = await image_service.get_image_info_by_uuid(uuid)
+    if image is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    return image
+
+
+@router.get('/info-by-id/{image_id}')
+async def get_image_info_by_id(image_id: int):
+    image = await image_service.get_image_info_by_id(image_id)
+    if image is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    return image
 
 
 @router.delete('/delete/{uuid}')

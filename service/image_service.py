@@ -68,11 +68,12 @@ async def confirm_image(uuid: UUID) -> Optional[Image]:
     return inserting_image
 
 
-async def get_uuid():
-    v = await app.state.redis.get('17a80487-0f33-49f9-b8cc-ba60bf79b0c9')
-    logger.info('V: ', v)
-    v = await app.state.redis.keys()
-    logger.info('V: ', v)
+async def get_image_info_by_uuid(uuid: UUID) -> Optional[Image]:
+    return await __image_repository.get_info_by_uuid(uuid)
+
+
+async def get_image_info_by_id(image_id: int) -> Optional[Image]:
+    return await __image_repository.get_info_by_id(image_id)
 
 
 async def delete_image(uuid: UUID) -> Optional[Image]:
