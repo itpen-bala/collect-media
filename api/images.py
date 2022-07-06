@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Response, status, HTTPException
 from PIL import UnidentifiedImageError
+from loguru import logger
 
 import service.image_service as image_service
 from model.images import BaseImage, Image
@@ -46,7 +47,8 @@ async def get_image_info_by_id(image_id: int):
 async def delete_image(uuid: UUID) -> Optional[Image]:
     try:
         image = await image_service.delete_image(uuid)
-    except InternalServerException:
+    except InternalServerException as err:
+        logger.exception(err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     if not image:
         raise HTTPException(status.HTTP_404_NOT_FOUND)

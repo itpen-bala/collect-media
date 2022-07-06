@@ -3,10 +3,11 @@ import io
 import ftplib
 from ftplib import (
     FTP,
+    Error,
     error_perm,
     error_reply,
 )
-from typing import Any, Optional, BinaryIO
+from typing import Any, Optional
 from loguru import logger
 
 import config
@@ -27,11 +28,14 @@ class FTPClient:
         )
 
     def upload_opened_file(self, file, ftp_path: str) -> None:
-        logger.info('Upload file to FTP path {}', ftp_path)
-        self.client.storbinary('STOR ' + ftp_path, file)
+        try:
+            logger.info("Upload file to FTP path {}", ftp_path)
+            self.client.storbinary('STOR ' + ftp_path, file)
+        except error_perm as err:
+            raise InternalServerException(err)
 
     def get_opened_file(self, ftp_path) -> Any:
-        logger.info('Opening file from FTP path {}', ftp_path)
+        logger.info("Opening file from FTP path {}", ftp_path)
         f = io.BytesIO()
         self.client.retrbinary('RETR ' + ftp_path, f.write)
         return f
@@ -39,7 +43,7 @@ class FTPClient:
     def move_file(self, src_file: str, dst_file: str) -> None:
         # TODO: check this method, when we want move a file to another file system
         try:
-            logger.info(f'Moving file {src_file} to {dst_file}')
+            logger.info(f"Moving file {src_file} to {dst_file}")
             self.client.rename(src_file, dst_file)
         except ftplib.Error as e:
             logger.exception(e)
@@ -59,7 +63,7 @@ class FTPClient:
         if directory[0] == '/':
             directory = directory[1:]
         if self._is_dir_exist(directory) is False:
-            logger.info(f'Creating directory: {directory}')
+            logger.info(f"Creating directory: {directory}")
             self.client.mkd(directory)
 
     def get_size(self, file_path):
@@ -67,6 +71,7 @@ class FTPClient:
 
     def delete(self, file_path) -> None:
         try:
+            logger.info(f"Deleting file from FTP. Path: {file_path}")
             self.client.delete(file_path)
         except error_perm as err:
             raise InternalServerException(err)
