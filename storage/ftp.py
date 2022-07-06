@@ -72,8 +72,13 @@ class FTPClient:
     def delete(self, file_path) -> None:
         try:
             logger.info(f"Deleting file from FTP. Path: {file_path}")
+            raise error_perm
             self.client.delete(file_path)
         except error_perm as err:
-            raise InternalServerException(err)
+            raise InternalServerException() from err
         except error_reply as err:
-            raise InternalServerException(err)
+            raise InternalServerException() from err
+        except Error as err:
+            raise InternalServerException() from err
+        except EOFError as err:
+            raise InternalServerException() from err
