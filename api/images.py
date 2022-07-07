@@ -14,6 +14,13 @@ router = APIRouter(prefix='/images')
 
 @router.post('/download-image')
 async def download_image(image: BaseImage) -> Response:
+    """Getting URL and UUID from client for downloading image file from this URL.
+    The file is uploaded to the FTP server as a temporary file until client confirmation
+    (see the method "confirm_image").
+    UUID from client and FTP path of this file is uploaded to redis as KEY and VALUE.
+
+    TODO: add deleting a temporary file from FTP server and deleting information about
+     this file from Redis after a timeout, if there is no confirmation of saving the file."""
     try:
         received_image = await image_service.download_image(image)
     except UnidentifiedImageError:
@@ -23,6 +30,9 @@ async def download_image(image: BaseImage) -> Response:
 
 @router.put('/confirm-image/{uuid}')
 async def confirm_image(uuid: UUID) -> Optional[Image]:
+    """Receiving confirmation from the client, that the temporary file with this UUID should
+    become a permanent file. And information about this file with its parameters is inserting
+    into SQL database."""
     image = await image_service.confirm_image(uuid)
     return image
 
@@ -45,6 +55,8 @@ async def get_image_info_by_id(image_id: int):
 
 @router.delete('/delete/{uuid}')
 async def delete_image(uuid: UUID) -> Optional[Image]:
+    """Deleting a permanent image file from FTP server
+    and deleting information about this file from SQL database."""
     try:
         image = await image_service.delete_image(uuid)
     except InternalServerException as err:
