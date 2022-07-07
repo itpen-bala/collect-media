@@ -25,7 +25,6 @@ async def download_image(image: BaseImage):
     try:
         rcvd_image = PILImage.open(data)
         logger.info(f'Received file with format {rcvd_image.format}')
-
     except UnidentifiedImageError as err:
         logger.info('Can\'t download_image image. ', err)
         raise UnidentifiedImageError
