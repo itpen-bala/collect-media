@@ -80,4 +80,5 @@ async def delete_image(uuid: UUID) -> Optional[Image]:
     image = await __image_repository.delete(uuid)
     if image is not None:
         __ftp.delete(image.ftp_path)
+        # TODO: added rollback if not possible to delete image file from FTP-server
     return image
