@@ -1,6 +1,6 @@
 from databases import Database
 from sqlalchemy import create_engine, MetaData
-
+# TODO: delete databases and add async sqlalchemy
 
 DATABASE_URL = "postgresql://media_user:qwerty@127.0.0.1:5432/main_db"
 
