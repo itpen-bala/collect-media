@@ -1,54 +1,47 @@
-import datetime
 from uuid import UUID
 from typing import Optional
 
-from loguru import logger
+from sqlalchemy import select, delete
 
 from .base import BaseRepository
 from model.images import Image
-from db.postgres import image_files
 
 
 class ImageRepository(BaseRepository):
 
     async def create(self, image: Image) -> Image:
-        image = Image(
-            uuid=image.uuid,
-            url=image.url,
-            ftp_path=image.ftp_path,
-            format=image.format,
-            width=image.width,
-            height=image.height,
-            image_size=image.image_size,
-            file_size=image.file_size,
-            created_at=datetime.datetime.utcnow(),
-            updated_at=datetime.datetime.utcnow(),
-        )
-        values = image.dict()
-        values.pop('id', None)
-        query = image_files.insert().values(**values)
-        image.id = await self.db.execute(query=query)
+        async with self.db.session() as session:
+            session.add(image)
+            await session.commit()
+            await session.refresh(image)
         return image
 
     async def get_info_by_uuid(self, uuid: UUID) -> Optional[Image]:
-        query = image_files.select().where(image_files.c.uuid == uuid)
-        image = await self.db.fetch_one(query=query)
+        query = select(Image).where(Image.uuid == uuid)
+        async with self.db.session() as session:
+            result = await session.execute(query)
+            image = result.scalar()
         if not image:
             return None
-        return Image.parse_obj(image)
+        return image
 
     async def get_info_by_id(self, image_id: int) -> Optional[Image]:
-        query = image_files.select().where(image_files.c.id == image_id)
-        image = await self.db.fetch_one(query=query)
+        query = select(Image).where(Image.id == image_id)
+        async with self.db.session() as session:
+            result = await session.execute(query)
+            image = result.scalar()
         if not image:
             return None
-        return Image.parse_obj(image)
+        return image
 
     async def delete(self, uuid: UUID) -> Optional[Image]:
-        query = image_files.select().where(image_files.c.uuid == uuid)
-        image = await self.db.fetch_one(query=query)
-        if not image:
-            return None
-        query = image_files.delete().where(image_files.c.uuid == uuid)
-        await self.db.execute(query=query)
-        return Image.parse_obj(image)
+        query = select(Image).where(Image.uuid == uuid)
+        async with self.db.session() as session:
+            result = await session.execute(query)
+            image = result.scalar()
+            if not image:
+                return None
+            query = delete(Image).where(Image.uuid == uuid)
+            await session.execute(query)
+            await session.commit()
+        return image

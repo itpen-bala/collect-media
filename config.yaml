@@ -1,3 +1,6 @@
+postgresql:
+  url: postgresql+asyncpg://media_user:qwerty@127.0.0.1:5432/media_db
+
 ftp:
   host: 127.0.0.1
   user: username

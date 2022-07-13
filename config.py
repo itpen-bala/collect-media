@@ -18,6 +18,10 @@ def get_settings_from_yaml(conf_path: str) -> t.Dict:
         logger.error(f'Cannot read settings from file {conf_file}: {err}')
 
 
+class PostgreSQLSettings(BaseModel):
+    url: str
+
+
 class FTPSettings(BaseModel):
     host: str
     user: str
@@ -31,6 +35,7 @@ class RedisSettings(BaseModel):
 
 
 class AllSettings(BaseModel):
+    postgresql: PostgreSQLSettings
     ftp: FTPSettings
     redis: RedisSettings
 
