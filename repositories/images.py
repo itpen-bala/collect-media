@@ -25,15 +25,6 @@ class ImageRepository(BaseRepository):
             return None
         return image
 
-    async def get_info_by_id(self, image_id: int) -> Optional[Image]:
-        query = select(Image).where(Image.id == image_id)
-        async with self.db.session() as session:
-            result = await session.execute(query)
-            image = result.scalar()
-        if not image:
-            return None
-        return image
-
     async def delete(self, uuid: UUID) -> Optional[Image]:
         query = select(Image).where(Image.uuid == uuid)
         async with self.db.session() as session:

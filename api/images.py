@@ -60,17 +60,6 @@ async def get_image_info_by_uuid(
     return image
 
 
-@router.get('/info-by-id/{image_id}')
-async def get_image_info_by_id(
-        image_id: int,
-        image_service: ImageService = Depends(get_image_service),
-):
-    image = await image_service.get_image_info_by_id(image_id)
-    if image is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
-    return image
-
-
 @router.delete('/delete/{uuid}')
 async def delete_image(
         uuid: UUID,

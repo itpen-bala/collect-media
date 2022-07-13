@@ -71,9 +71,6 @@ class ImageService:
     async def get_image_info_by_uuid(self, uuid: UUID) -> Optional[Image]:
         return await self.image_repository.get_info_by_uuid(uuid)
 
-    async def get_image_info_by_id(self, image_id: int) -> Optional[Image]:
-        return await self.image_repository.get_info_by_id(image_id)
-
     async def delete_image(self, uuid: UUID) -> Optional[Image]:
         image = await self.image_repository.delete(uuid)
         if image is not None:

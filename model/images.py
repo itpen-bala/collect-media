@@ -19,8 +19,7 @@ MediaBase: ConcreteBase = declarative_base(cls=Base)
 class Image(MediaBase):
     __tablename__ = "image_files"
 
-    id = sa.Column("id", sa.Integer, primary_key=True, autoincrement=True, unique=True)
-    uuid = sa.Column("uuid", SQLUUID(as_uuid=True), unique=True, nullable=False)
+    uuid = sa.Column("uuid", SQLUUID(as_uuid=True), primary_key=True, unique=True, nullable=False)
     url = sa.Column("url", sa.VARCHAR, nullable=False)
     ftp_path = sa.Column("ftp_path", sa.VARCHAR, nullable=False)
     format = sa.Column("format", sa.VARCHAR, nullable=False)
