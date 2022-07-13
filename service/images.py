@@ -11,7 +11,7 @@ from main import app
 from config import settings
 from client.client import create_session
 from storage.ftp import FTPClient
-from model.images import Image
+from model.images import Image, MediaUUID
 from repositories.images import ImageRepository
 
 
@@ -20,7 +20,7 @@ class ImageService:
         self.image_repository = repository
         self._ftp = FTPClient()
 
-    async def download_image(self, image_url: str) -> UUID:
+    async def download_image(self, image_url: str) -> MediaUUID:
         data = io.BytesIO(await create_session(image_url))
         try:
             rcvd_image = PILImage.open(data)
@@ -36,7 +36,7 @@ class ImageService:
         ftp.upload_opened_file(file=data, ftp_path=os.path.join(settings.ftp.tmpimagepath, str(uuid)))
 
         await app.state.redis.set(str(uuid), image_url)
-        return uuid
+        return MediaUUID.parse_obj({"uuid": uuid})
 
     async def confirm_image(self, uuid: UUID) -> Optional[Image]:
         str_uuid = str(uuid)
@@ -70,9 +70,6 @@ class ImageService:
 
     async def get_image_info_by_uuid(self, uuid: UUID) -> Optional[Image]:
         return await self.image_repository.get_info_by_uuid(uuid)
-
-    async def get_image_info_by_id(self, image_id: int) -> Optional[Image]:
-        return await self.image_repository.get_info_by_id(image_id)
 
     async def delete_image(self, uuid: UUID) -> Optional[Image]:
         image = await self.image_repository.delete(uuid)
