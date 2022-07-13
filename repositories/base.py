@@ -1,7 +1,8 @@
-from databases import Database
+from dataclasses import dataclass
+
+from db.db import Database
 
 
+@dataclass
 class BaseRepository:
-    def __init__(self, db: Database):
-        self.db = db
-        print('DB: ', self.db)
+    db: Database
