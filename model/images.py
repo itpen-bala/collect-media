@@ -1,8 +1,10 @@
 import datetime
+from pydantic import BaseModel
+from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base, ConcreteBase
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID as SQLUUID
 
 
 class Base:
@@ -18,7 +20,7 @@ class Image(MediaBase):
     __tablename__ = "image_files"
 
     id = sa.Column("id", sa.Integer, primary_key=True, autoincrement=True, unique=True)
-    uuid = sa.Column("uuid", UUID(as_uuid=True), unique=True, nullable=False)
+    uuid = sa.Column("uuid", SQLUUID(as_uuid=True), unique=True, nullable=False)
     url = sa.Column("url", sa.VARCHAR, nullable=False)
     ftp_path = sa.Column("ftp_path", sa.VARCHAR, nullable=False)
     format = sa.Column("format", sa.VARCHAR, nullable=False)
@@ -32,7 +34,7 @@ class Image(MediaBase):
     @classmethod
     def build(
             cls,
-            uuid: UUID,
+            uuid: SQLUUID,
             url: str,
             ftp_path: str,
             format: str,
@@ -55,3 +57,11 @@ class Image(MediaBase):
             created_at=created_at,
             updated_at=updated_at,
         )
+
+
+class MediaURL(BaseModel):
+    url: str
+
+
+class MediaUUID(BaseModel):
+    uuid: UUID

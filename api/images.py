@@ -4,8 +4,6 @@ from typing import Optional
 from fastapi import (
     APIRouter,
     Depends,
-    Response,
-    Request,
     status,
     HTTPException,
 )
@@ -14,7 +12,7 @@ from loguru import logger
 
 from api.dependens import get_image_service
 from service.images import ImageService
-from model.images import Image
+from model.images import Image, MediaURL, MediaUUID
 from exceptions import InternalServerException
 
 router = APIRouter(prefix='/images')
@@ -22,9 +20,9 @@ router = APIRouter(prefix='/images')
 
 @router.post('/download-image')
 async def download_image(
-        request: Request,
+        data: MediaURL,
         image_service: ImageService = Depends(get_image_service),
-) -> Response:
+) -> MediaUUID:
     """Getting URL and UUID from client for downloading image file from this URL.
     The file is uploaded to the FTP server as a temporary file until client confirmation
     (see the method "confirm_image").
@@ -32,23 +30,22 @@ async def download_image(
 
     TODO: add deleting a temporary file from FTP server and deleting information about
      this file from Redis after a timeout, if there is no confirmation of saving the file."""
-    image_url = await request.body()
     try:
-        uuid = await image_service.download_image(image_url.decode())
+        uuid = await image_service.download_image(data.url)
     except UnidentifiedImageError:
-        return Response(status_code=status.HTTP_404_NOT_FOUND)
-    return Response(content=f"{{'UUID': {uuid}}}", media_type="application/json")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return uuid
 
 
-@router.put('/confirm-image/{uuid}')
+@router.post('/confirm-image')
 async def confirm_image(
-        uuid: UUID,
+        data: MediaUUID,
         image_service: ImageService = Depends(get_image_service),
 ) -> Optional[Image]:
     """Receiving confirmation from the client, that the temporary file with this UUID should
     become a permanent file. And information about this file with its parameters is inserting
     into SQL database."""
-    image = await image_service.confirm_image(uuid)
+    image = await image_service.confirm_image(data.uuid)
     return image
 
 
