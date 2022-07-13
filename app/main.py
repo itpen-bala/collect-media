@@ -1,10 +1,11 @@
 from loguru import logger
 
-from config import settings, app
-from api.images import router
-from storage.redis import get_redis_pool
-from db.postgres import Database, CONN_KWARGS
-from model.images import MediaBase
+from app import app
+from app.api.images import router
+from app.config import settings
+from app.storage.redis import get_redis_pool
+from app.db.postgres import Database, CONN_KWARGS
+from app.model.images import MediaBase
 
 app.include_router(router)
 

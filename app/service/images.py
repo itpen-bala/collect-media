@@ -7,12 +7,12 @@ from typing import Optional
 from loguru import logger
 from PIL import Image as PILImage, UnidentifiedImageError
 
-from main import app
-from config import settings
-from client.client import create_session
-from storage.ftp import FTPClient
-from model.images import Image, MediaUUID
-from repositories.images import ImageRepository
+from app.main import app
+from app.config import settings
+from app.client.client import create_session
+from app.storage.ftp import FTPClient
+from app.model.images import Image, MediaUUID
+from app.repositories.images import ImageRepository
 
 
 class ImageService:

@@ -4,8 +4,8 @@ from ftplib import FTP, all_errors
 from typing import Any, Optional
 from loguru import logger
 
-import config
-from exceptions import InternalServerException
+from app import config
+from app.exceptions import InternalServerException
 
 
 class FTPClient:
