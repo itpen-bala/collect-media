@@ -5,6 +5,7 @@ from fastapi import (
     APIRouter,
     Depends,
     Response,
+    Request,
     status,
     HTTPException,
 )
@@ -12,8 +13,8 @@ from PIL import UnidentifiedImageError
 from loguru import logger
 
 from api.dependens import get_image_service
-from service.image import ImageService
-from model.images import BaseImage, Image
+from service.images import ImageService
+from model.images import Image
 from exceptions import InternalServerException
 
 router = APIRouter(prefix='/images')
@@ -21,7 +22,7 @@ router = APIRouter(prefix='/images')
 
 @router.post('/download-image')
 async def download_image(
-        image: BaseImage,
+        request: Request,
         image_service: ImageService = Depends(get_image_service),
 ) -> Response:
     """Getting URL and UUID from client for downloading image file from this URL.
@@ -31,11 +32,12 @@ async def download_image(
 
     TODO: add deleting a temporary file from FTP server and deleting information about
      this file from Redis after a timeout, if there is no confirmation of saving the file."""
+    image_url = await request.body()
     try:
-        received_image = await image_service.download_image(image)
+        uuid = await image_service.download_image(image_url.decode())
     except UnidentifiedImageError:
         return Response(status_code=status.HTTP_404_NOT_FOUND)
-    return received_image
+    return Response(content=f"{{'UUID': {uuid}}}", media_type="application/json")
 
 
 @router.put('/confirm-image/{uuid}')

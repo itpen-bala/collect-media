@@ -1,7 +1,7 @@
 import os
 import io
 import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 from typing import Optional
 
 from loguru import logger
@@ -11,8 +11,7 @@ from main import app
 from config import settings
 from client.client import create_session
 from storage.ftp import FTPClient
-from db.tables import Image
-from model.images import BaseImage
+from model.images import Image
 from repositories.images import ImageRepository
 
 
@@ -21,9 +20,8 @@ class ImageService:
         self.image_repository = repository
         self._ftp = FTPClient()
 
-    async def download_image(self, image: BaseImage):
-        uuid = str(image.uuid)
-        data = io.BytesIO(await create_session(image.url))
+    async def download_image(self, image_url: str) -> UUID:
+        data = io.BytesIO(await create_session(image_url))
         try:
             rcvd_image = PILImage.open(data)
             logger.info(f'Received file with format {rcvd_image.format}')
@@ -31,13 +29,14 @@ class ImageService:
             logger.info('Can\'t download_image image. ', err)
             raise UnidentifiedImageError
 
+        uuid = uuid4()
         ftp = FTPClient()
         ftp.mkd(parent_dir='/', directory=settings.ftp.tmpimagepath)
         data.seek(0)
-        ftp.upload_opened_file(file=data, ftp_path=os.path.join(settings.ftp.tmpimagepath, uuid))
+        ftp.upload_opened_file(file=data, ftp_path=os.path.join(settings.ftp.tmpimagepath, str(uuid)))
 
-        await app.state.redis.set(uuid, image.url)
-        return image
+        await app.state.redis.set(str(uuid), image_url)
+        return uuid
 
     async def confirm_image(self, uuid: UUID) -> Optional[Image]:
         str_uuid = str(uuid)
@@ -50,13 +49,13 @@ class ImageService:
         image = PILImage.open(self._ftp.get_opened_file(src_file))
 
         image_for_db = Image.build(
-            uuid=str_uuid,
+            uuid=uuid,
             url=image_url,
             ftp_path=dst_file,
             format=image.format,
             width=image.width,
             height=image.height,
-            image_size=image.size,
+            image_size=image.size,  # size in pixel array (for example: 1600 x 1200)
             file_size=self._ftp.get_size(src_file),  # size in bytes
             created_at=datetime.datetime.utcnow(),
             updated_at=datetime.datetime.utcnow(),

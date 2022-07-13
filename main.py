@@ -1,11 +1,10 @@
-from fastapi import FastAPI
 from loguru import logger
 
 from config import settings, app
 from api.images import router
 from storage.redis import get_redis_pool
-from db.db import Database, CONN_KWARGS
-from db.tables import MediaBase
+from db.postgres import Database, CONN_KWARGS
+from model.images import MediaBase
 
 app.include_router(router)
 
