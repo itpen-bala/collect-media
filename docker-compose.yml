@@ -2,6 +2,20 @@ version: '3.7'
    
 services:
 
+  app:
+    image: collect-media
+    container_name: collect-media-service
+    ports:
+      - "80:80"
+    restart: always
+    # Docker network driver "host" is used.
+    # Hostnames to access servers from docker container "collect-media".
+    # To access from host system use "127.0.0.1" instead.
+    links:
+      - "db:postgres"
+      - "redis:red"
+      - "ftp:ftp-server"
+
   db:
     image: postgres
     container_name: media_db
@@ -17,9 +31,8 @@ services:
     image: redis
     container_name: media_redis
     ports:
-    ports:
       - '6379:6379'
-   
+
   ftp:
     image: stilliard/pure-ftpd
     container_name: media_ftp
