@@ -10,10 +10,10 @@ from fastapi import (
 from PIL import UnidentifiedImageError
 from loguru import logger
 
-from api.dependens import get_image_service
-from service.images import ImageService
-from model.images import Image, MediaURL, MediaUUID
-from exceptions import InternalServerException
+from app.api.dependens import get_image_service
+from app.service.images import ImageService
+from app.model.images import Image, MediaURL, MediaUUID
+from app.exceptions import InternalServerException
 
 router = APIRouter(prefix='/images')
 

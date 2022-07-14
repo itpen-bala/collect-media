@@ -1,6 +1,6 @@
 from aioredis import Redis
 
-import config
+from app import config
 
 
 async def get_redis_pool() -> Redis:

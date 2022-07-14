@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from db.postgres import Database
+from app.db.postgres import Database
 
 
 @dataclass
