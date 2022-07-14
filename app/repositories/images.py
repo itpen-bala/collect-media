@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import select, delete
 
 from .base import BaseRepository
-from model.images import Image
+from app.model.images import Image
 
 
 class ImageRepository(BaseRepository):

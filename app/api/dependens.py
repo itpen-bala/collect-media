@@ -1,9 +1,9 @@
 from fastapi import Depends
 from starlette.requests import Request
 
-from db.postgres import Database
-from repositories.images import ImageRepository
-from service.images import ImageService
+from app.db.postgres import Database
+from app.repositories.images import ImageRepository
+from app.service.images import ImageService
 
 
 def get_database_client(request: Request) -> Database:
